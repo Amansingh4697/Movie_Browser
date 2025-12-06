@@ -1,38 +1,30 @@
-import { useState, useEffect } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
 
-function App() {
-  const [page, setPage] = useState(1);
-  const [movies, setMovies] = useState([]);
+// Lazy loading pages
+const Home = lazy(() => import("./pages/Home"));
+const MovieDetails = lazy(() => import("./pages/MovieDetails"));
+const About = lazy(() => import("./pages/About"));
 
-  async function fetchMovies() {
-    const res = await fetch(
-      `http://www.omdbapi.com/?s=batman&apikey=bd0897b&page=${page}`
-    );
-    const data = await res.json();
-    setMovies(data.Search || []);
-  }
-
-  useEffect(() => {
-    fetchMovies();
-  }, [page]);
-
+export default function App() {
   return (
-    <>
-      <div>
-        <h1>Movies (Page {page})</h1>
+    <div>
+      <h1>Movie Browser</h1>
 
-        {movies.map((movie) => (
-          <p key={movie.imdbID}>{movie.Title}</p>
-        ))}
+      <nav>
+        <Link to="/">Home</Link> |{" "}
+        <Link to="/about">About</Link>
+      </nav>
 
-        <button disabled={page === 1} onClick={() => setPage(page - 1)}>
-          Previous
-        </button>
+      <hr />
 
-        <button onClick={() => setPage(page + 1)}>Next</button>
-      </div>
-    </>
+      <Suspense fallback={<p>Loading...</p>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
-
-export default App;
