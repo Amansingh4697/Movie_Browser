@@ -1,42 +1,38 @@
-import { useState } from 'react'
-import './App.css'
-import { BrowserRouter, Routes, Route, Link, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 function App() {
-    function Layout(){
-     return ( <div style={{height:"100vh"}}>
-          <h1>
-        welcome to movie Browser app
-        </h1>
-        <div style={{height:"90vh"}}>
-          <Outlet></Outlet>
-        </div>
-        about | contact us
-      </div>)
-    }
-  function Home(){
-    return (
-      <div>Welcome to home page</div>
-    )
+  const [page, setPage] = useState(1);
+  const [movies, setMovies] = useState([]);
+
+  async function fetchMovies() {
+    const res = await fetch(
+      `http://www.omdbapi.com/?s=batman&apikey=bd0897b&page=${page}`
+    );
+    const data = await res.json();
+    setMovies(data.Search || []);
   }
-  function About(){
-    return(
-    <div>
-      <h1>contact us on this details</h1>
-    </div>
-   )
-  }
+
+  useEffect(() => {
+    fetchMovies();
+  }, [page]);
+
   return (
     <>
-      <BrowserRouter>
-      <Routes>
-        <Route path="/"  element={<Layout/>}>
-        <Route path="/home" element= {<Home/>}></Route>
-        <Route path='/about' element = {<About></About>} />
-        </Route>
-      </Routes>
-      </BrowserRouter>
+      <div>
+        <h1>Movies (Page {page})</h1>
+
+        {movies.map((movie) => (
+          <p key={movie.imdbID}>{movie.Title}</p>
+        ))}
+
+        <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+          Previous
+        </button>
+
+        <button onClick={() => setPage(page + 1)}>Next</button>
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
